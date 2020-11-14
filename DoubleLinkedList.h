@@ -1,4 +1,3 @@
-#include <string>
 #include <typeinfo>
 #include "CustomIterator.h"
 
