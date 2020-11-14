@@ -1,3 +1,4 @@
+// Took the code from https://jguegant.github.io/blogs/tech/thread-safe-multi-type-map.html
 // Default key definition for containers containing only one instance of data type
 struct DefaultSlotKey;
 

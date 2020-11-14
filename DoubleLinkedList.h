@@ -1,5 +1,6 @@
 #include <string>
 #include <typeinfo>
+#include "CustomIterator.h"
 
 // Forward declaration for template friend operator
 template <class T> class DoubleLinkedList;
@@ -8,45 +9,53 @@ template <class T> std::ostream &operator<<(std::ostream &str, const DoubleLinke
 template <class T>
 class DoubleLinkedList 
 {
-public:
-                            DoubleLinkedList();
-                           ~DoubleLinkedList();
-    inline unsigned int     getSize         () const                                            {return m_size;}        // Constructor
-    inline bool             isEmpty         () const                                            {return m_size == 0;}   // Destructor
-    void                    append          (const T &data);                                                            // Append element to the end of the list
-    void                    operator+=      (const T &data);                                                            // Append element to the end of the list
-    void                    prepend         (const T &data);                                                            // Prepend element to the begin of the list
-    void                    insert          (const unsigned int position, const T &data);                               // Insert element at position in the list
-    T                       remove          (const unsigned int position);                                              // Remove position element from the list
-    T                       removeLast      ();                                                                         // Remove last element from the list
-    T                       removeFirst     ();                                                                         // Remove first element from the list
-    T                      &at              (const unsigned int position);                                              // Get data at position
-    T                      &operator[]      (const unsigned int position);                                              // Get data at position
-    void                    clear           ();                                                                         // Clear all data list
-    std::string             toString        () const;                                                                   // Format data for string output
-    friend std::ostream    &operator<< <>   (std::ostream &str, const DoubleLinkedList &list);                          // Commodity stream operator overload
-
-private:
-
     struct Node
     {
-        Node() : m_data(), m_prev(nullptr), m_next(nullptr) {}
-        Node(const T &data, Node *prev = nullptr, Node *next = nullptr) : m_data(data), m_prev(prev), m_next(next) {}
+        Node() : m_data(), m_next(nullptr), m_prev(nullptr){}
+        Node(const T &data, Node *next = nullptr, Node *prev = nullptr) : m_data(data), m_next(next), m_prev(prev) {}
+        Node *next() {if(hasNext()) return m_next; else throw std::exception();}
+        bool hasNext() {return m_next != nullptr;}
+        T operator*(){return m_data;}
+        friend std::ostream &operator<<(std::ostream &str, const Node &node){str << node.m_data; return str;}
 
         T m_data;
-        Node *m_prev;
-        Node *m_next; 
+        Node *m_next;
+        Node *m_prev; 
     };
 
+public:
+    typedef                 CustomIterator<Node> iterator;
+
+                            DoubleLinkedList();
+                           ~DoubleLinkedList();
+    inline unsigned int     getSize         () const                                            {return m_size;}            // Constructor
+    inline bool             isEmpty         () const                                            {return m_size == 0;}       // Destructor
+    void                    append          (const T &data);                                                                // Append element to the end of the list
+    void                    operator+=      (const T &data);                                                                // Append element to the end of the list
+    void                    prepend         (const T &data);                                                                // Prepend element to the begin of the list
+    void                    insert          (const unsigned int position, const T &data);                                   // Insert element at position in the list
+    T                       remove          (const unsigned int position);                                                  // Remove position element from the list
+    T                       removeLast      ();                                                                             // Remove last element from the list
+    T                       removeFirst     ();                                                                             // Remove first element from the list
+    T                      &at              (const unsigned int position);                                                  // Get data at position
+    T                      &operator[]      (const unsigned int position);                                                  // Get data at position
+    inline iterator         begin           ()                                                  {return iterator(m_head);}  // Get iterator to the first linked list element                                                       
+    inline iterator         end             ()                                                  {return iterator(m_beyond);}// Get iterator to the last linked list element                                                       
+    void                    clear           ();                                                                             // Clear all data list
+    std::string             toString        () const;                                                                       // Format data for string output
+    friend std::ostream    &operator<< <>   (std::ostream &str, const DoubleLinkedList &list);                              // Commodity stream operator overload
+
+private:
     T                       removeInternal  (Node *node);
 
     unsigned int            m_size;
     Node                   *m_head;
     Node                   *m_tail;
+    Node                   *m_beyond;
 };
 
 template <class T>
-DoubleLinkedList<T>::DoubleLinkedList() : m_size(0), m_head(nullptr), m_tail(nullptr) 
+DoubleLinkedList<T>::DoubleLinkedList() : m_size(0), m_head(nullptr), m_tail(nullptr), m_beyond(new Node(T()))
 {
 }
 
@@ -59,7 +68,7 @@ DoubleLinkedList<T>::~DoubleLinkedList()
 template <class T>
 void DoubleLinkedList<T>::append(const T &data)
 {
-    Node *tmp = new Node(data);
+    Node *tmp = new Node(data, m_beyond);
 
     if(isEmpty())
         m_head = tmp;
@@ -185,7 +194,7 @@ T DoubleLinkedList<T>::removeLast()
     if(isEmpty())
         m_head = nullptr;
     else
-        m_tail->m_next = nullptr;
+        m_tail->m_next = m_beyond;
 
     return data;   
 }
@@ -262,10 +271,10 @@ std::string DoubleLinkedList<T>::toString() const
     std::string res = std::string(typeid(T).name()) + " double linked list content is: [";
     
     Node *current = m_head;
-    while(current)
+    while(current->hasNext())
     {
         res += std::to_string(current->m_data) + ", ";
-        current = current->m_next;
+        current = current->next();
     }
 
     // Remove last comma
@@ -285,10 +294,10 @@ std::string DoubleLinkedList<std::string>::toString() const
     std::string res = "std::string double linked list content is: [";
     
     Node *current = m_head;
-    while(current)
+    while(current->hasNext())
     {
         res += current->m_data + ", ";
-        current = current->m_next;
+        current = current->next();
     }
 
     // Remove last comma
