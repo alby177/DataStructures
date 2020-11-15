@@ -1,4 +1,5 @@
 #include <typeinfo>
+#include <string>
 #include "CustomIterator.h"
 
 // Forward declaration for template friend operator
@@ -191,7 +192,9 @@ T DoubleLinkedList<T>::removeLast()
     --m_size;
 
     if(isEmpty())
+    {
         m_head = nullptr;
+    }
     else
         m_tail->m_next = m_beyond;
 
@@ -270,7 +273,7 @@ std::string DoubleLinkedList<T>::toString() const
     std::string res = std::string(typeid(T).name()) + " double linked list content is: [";
     
     Node *current = m_head;
-    while(current->hasNext())
+    while(!isEmpty() && current->hasNext())
     {
         res += std::to_string(current->m_data) + ", ";
         current = current->next();
@@ -293,7 +296,7 @@ std::string DoubleLinkedList<std::string>::toString() const
     std::string res = "std::string double linked list content is: [";
     
     Node *current = m_head;
-    while(current->hasNext())
+    while(!isEmpty() && current->hasNext())
     {
         res += current->m_data + ", ";
         current = current->next();
