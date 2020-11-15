@@ -5,7 +5,7 @@ ODIR = obj
 
 TARGETS = GenericContainerTest TestDoubleLinkedList TestStack
 
-_DEPS = DoubleLinkedList.h LinkedList.h GenericContainer.h Stack.h
+_DEPS = DoubleLinkedList.h LinkedList.h GenericContainer.h Stack.h CustomIterator.h
 DEPS = $(patsubst %,$(IDIR)/%,$(_DEPS))
 
 all: $(TARGETS)
